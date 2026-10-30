@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { supabase } from './supabase';
@@ -19,7 +18,6 @@ import {
   FileBarChart, Search, RefreshCw, Wifi, WifiOff, X, Clock, CheckCircle2,
   AlertTriangle, Headphones, UserCog, Eye, EyeOff
 } from 'lucide-react';
-import {
 const nav = [
   { id: 'overview', label: 'Visão geral', icon: LayoutDashboard },
   { id: 'calls', label: 'Chamadas', icon: PhoneCall },
