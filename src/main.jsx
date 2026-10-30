@@ -226,19 +226,6 @@ function App() {
 
 createRoot(document.getElementById('root')).render(<App />);
 
-const NAV=[['overview','Visão geral',LayoutDashboard],['calls','Ligações',PhoneCall],['operators','Operadores',Users],['alerts','Alertas',TriangleAlert],['reports','Relatórios',FileBarChart]];
-const localDate=d=>{const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
-function dateWindow(){const now=new Date(), start=new Date(now);start.setHours(8,0,0,0);const end=new Date(now);end.setHours(Math.min(18,now.getHours()),now.getHours()>=18?0:now.getMinutes(),0,0);if(now.getHours()<8)end.setHours(8,0,0,0);return {from:localDate(start),to:localDate(end)}}
-function toIso(date,hour,minute=0){return `${date}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00-03:00`}
-function getCallId(c){return String(c.idLigacao??c.argus_call_id??c.id??'')}
-function getOperator(c){return c.usuarioOperador??c.nomeUsuario??c.operator_name??'Não identificado'}
-function getStart(c){return c.dataHoraLigacao??c.call_started_at??c.dataHora??null}
-function getDuration(c){return Number(c.tempoSegundos??c.duration_seconds??0)}
-function getResult(c){return String(c.resultadoLigacao??c.call_result??c.tabulacao??'Sem resultado')}
-function isAttended(c){return /ATENDIMENTO|ATENDIDA|ATENDIDO|CONCLU[IÍ]D/i.test(getResult(c))}
-function fmtDate(v){if(!v)return '—';const d=new Date(v);return Number.isNaN(+d)?String(v):d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}
-function fmtDuration(n){n=Math.max(0,Number(n)||0);return `${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`}
-function App(){
  const [session,setSession]=useState(null),[profile,setProfile]=useState(null),[authReady,setAuthReady]=useState(false),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[loginError,setLoginError]=useState(''),[busy,setBusy]=useState(false);
  const [page,setPage]=useState('overview'),[mobile,setMobile]=useState(false),[calls,setCalls]=useState([]),[reviews,setReviews]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState(''),[meta,setMeta]=useState(null),[campaign,setCampaign]=useState('1');
  const win=dateWindow();const [from,setFrom]=useState(win.from),[to,setTo]=useState(win.to),[operator,setOperator]=useState('Todos'),[resultFilter,setResultFilter]=useState('Todos'),[reviewFilter,setReviewFilter]=useState('Todos'),[severityFilter,setSeverityFilter]=useState('Todas'),[search,setSearch]=useState('');
