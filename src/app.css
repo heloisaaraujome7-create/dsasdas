@@ -1,0 +1,33 @@
+/* Componentes novos (tabelas, etiquetas, modal, formulários) — usa as variáveis de styles.css */
+.table-wrap{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{text-align:left;font-weight:600;color:var(--muted);padding:11px 16px;border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table td{padding:11px 16px;border-bottom:1px solid #1d1d23;color:#dcdce2;white-space:nowrap}
+.data-table tbody tr:hover{background:#16161b}
+.data-table .right{text-align:right}
+.table-meta{padding:11px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)}
+.filter-toolbar.wrap{flex-wrap:wrap}
+.filter-select input[type=date]{border:0;outline:0;background:transparent;color:#c7c7cf;font-size:11px;color-scheme:dark}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:#23232a;color:#a9a9b4}
+.pill-green{background:#143626;color:var(--green)}.pill-amber{background:#3a2d12;color:var(--amber)}.pill-red{background:#3d1519;color:#ff6b78}
+.secondary-button.small{padding:6px 12px;font-size:11px}
+.plain-select{background:#18181e;border:1px solid #303039;color:#d6d6dc;border-radius:7px;padding:6px 8px;font-size:11px}
+.notice.success{border:1px solid #1f5a3d;background:#12261d;color:#7fdcaa}
+.notice.error{border:1px solid #6a2530;background:#2a1116;color:#ff9aa4}
+.notice{font-size:12px}.notice p{font-size:12px}
+.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.modal-scrim{position:fixed;inset:0;background:#000a;display:grid;place-items:center;padding:16px;z-index:50}
+.modal{width:min(560px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px}
+.modal-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:16px}
+.modal-head h3{margin:0;font:700 16px Manrope,sans-serif}.modal-head p{margin:6px 0 0;font-size:11px;color:var(--muted)}
+.criteria{display:grid;gap:8px;margin-bottom:16px}
+.check{display:flex;align-items:center;gap:9px;font-size:12px;color:#d6d6dc}
+.check input{accent-color:var(--red);width:16px;height:16px}
+.form-row{display:flex;align-items:flex-end;gap:14px;margin-bottom:14px}
+.form-row label,.form-col,.user-form label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--muted)}
+.form-row input,.form-col textarea,.user-form input:not([type=checkbox]),.user-form select{background:#18181e;border:1px solid #303039;border-radius:7px;color:#eee;padding:9px 10px;font-size:12px;width:100%}
+.form-col textarea{resize:vertical}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.form-panel{padding:20px}
+.user-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;align-items:end}
+@media(max-width:760px){.data-table th,.data-table td{padding:9px 10px}}
