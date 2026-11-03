@@ -16,6 +16,11 @@ export async function handler(event) {
   let input;
   try { input = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Corpo inválido.' }); }
   const idCampanha = Number(input.idCampanha || 1);
+  const idGrupoUsuario = Number(input.idGrupoUsuario || 1);
+
+if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
+  return json(400, { error: 'Grupo operacional inválido.' });
+}
   const start = new Date(input.periodoInicial);
   const end = new Date(input.periodoFinal);
   if (!Number.isInteger(idCampanha) || idCampanha <= 0) return json(400, { error: 'idCampanha inválido.' });
@@ -34,7 +39,12 @@ export async function handler(event) {
     const newOps = new Map();
 
     while (Date.now() < deadline) {
-      const payload = { idCampanha, periodoInicial: start.toISOString(), periodoFinal: end.toISOString() };
+      const payload = {
+  idCampanha,
+  idGrupoUsuario,
+  periodoInicial: start.toISOString(),
+  periodoFinal: end.toISOString()
+};
       if (ultimoId) payload.ultimoId = ultimoId;
       const data = await argusPost('/report/ligacoesdetalhadas', payload, Math.max(2000, deadline - Date.now() + 1000));
       if (data?.codStatus !== undefined && Number(data.codStatus) < 1) {
