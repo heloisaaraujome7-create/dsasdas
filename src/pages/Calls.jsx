@@ -125,13 +125,6 @@ export default function Calls({ session, role }) {
             throw new Error('A paginação do Argus não avançou. Verifique o retorno da API.');
           }
           ultimoId = Number(r.nextUltimoId);
-const r = await callFn('argus-sync-calls', session, {
-  idCampanha: 1,
-  idGrupoUsuario: 1,
-  periodoInicial: windows[i][0].toISOString(),
-  periodoFinal: windows[i][1].toISOString(),
-  ultimoId
-});
 
         }
 
