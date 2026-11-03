@@ -18,9 +18,19 @@ export async function handler(event) {
   const idCampanha = Number(input.idCampanha || 1);
   const idGrupoUsuario = Number(input.idGrupoUsuario || 1);
 
+<<<<<<< HEAD
   if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
     return json(400, { error: 'Grupo operacional inválido.' });
   }
+=======
+if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
+  return json(400, { error: 'Grupo operacional inválido.' });
+}
+
+if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
+  return json(400, { error: 'Grupo operacional inválido.' });
+}
+>>>>>>> 77d539a2b6a7c903e934ae9860a629b065f5aed0
   const start = new Date(input.periodoInicial);
   const end = new Date(input.periodoFinal);
   if (!Number.isInteger(idCampanha) || idCampanha <= 0) return json(400, { error: 'idCampanha inválido.' });

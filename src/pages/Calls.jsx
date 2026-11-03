@@ -101,6 +101,7 @@ export default function Calls({ session, role }) {
 
         for (let guard = 0; guard < 40; guard++) {
           setSync({ running: true, text: `Janela ${i + 1} de ${windows.length}…`, ...total });
+<<<<<<< HEAD
           const r = await callFn('argus-sync-calls', session, {
             idCampanha: 1,
             idGrupoUsuario: 1,
@@ -125,6 +126,15 @@ export default function Calls({ session, role }) {
             throw new Error('A paginação do Argus não avançou. Verifique o retorno da API.');
           }
           ultimoId = Number(r.nextUltimoId);
+=======
+const r = await callFn('argus-sync-calls', session, {
+  idCampanha: 1,
+  idGrupoUsuario: 1,
+  periodoInicial: windows[i][0].toISOString(),
+  periodoFinal: windows[i][1].toISOString(),
+  ultimoId
+});
+>>>>>>> 77d539a2b6a7c903e934ae9860a629b065f5aed0
         }
 
         if (!done) throw new Error('Limite de páginas atingido nesta janela. Execute a sincronização novamente.');
