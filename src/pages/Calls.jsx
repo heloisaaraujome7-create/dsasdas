@@ -88,23 +88,52 @@ export default function Calls({ session, role }) {
 
   async function runSync() {
     const windows = buildWindows(date);
-    if (!windows.length) { setSync({ error: 'Ainda não há período para sincronizar (a consulta começa às 08h).' }); return; }
+    if (!windows.length) {
+      setSync({ error: 'Ainda não há período para sincronizar (a consulta começa às 08h).' });
+      return;
+    }
+
     const total = { fetched: 0, matched: 0, saved: 0, byResult: {}, hitLimit: false };
     try {
       for (let i = 0; i < windows.length; i++) {
-        let ultimoId;
+        let ultimoId = null;
+        let done = false;
+
         for (let guard = 0; guard < 40; guard++) {
           setSync({ running: true, text: `Janela ${i + 1} de ${windows.length}…`, ...total });
-          const r = await callFn('argus-sync-calls', session, { idCampanha: 1, periodoInicial: windows[i][0].toISOString(), periodoFinal: windows[i][1].toISOString(), ultimoId });
-          total.fetched += r.fetched; total.matched += r.matched; total.saved += r.saved; total.hitLimit ||= r.hitLimit;
-          for (const [k, v] of Object.entries(r.byResult)) total.byResult[k] = (total.byResult[k] || 0) + v;
-          if (r.done) break;
-          ultimoId = r.nextUltimoId;
+          const r = await callFn('argus-sync-calls', session, {
+            idCampanha: 1,
+            idGrupoUsuario: 1,
+            periodoInicial: windows[i][0].toISOString(),
+            periodoFinal: windows[i][1].toISOString(),
+            ultimoId
+          });
+
+          total.fetched += Number(r.fetched || 0);
+          total.matched += Number(r.matched || 0);
+          total.saved += Number(r.saved || 0);
+          total.hitLimit = total.hitLimit || !!r.hitLimit;
+          for (const [resultado, quantidade] of Object.entries(r.byResult || {})) {
+            total.byResult[resultado] = (total.byResult[resultado] || 0) + Number(quantidade || 0);
+          }
+
+          if (r.done === true) {
+            done = true;
+            break;
+          }
+          if (r.nextUltimoId == null || Number(r.nextUltimoId) === Number(ultimoId)) {
+            throw new Error('A paginação do Argus não avançou. Verifique o retorno da API.');
+          }
+          ultimoId = Number(r.nextUltimoId);
         }
+
+        if (!done) throw new Error('Limite de páginas atingido nesta janela. Execute a sincronização novamente.');
       }
       setSync({ done: true, ...total });
       await reload();
-    } catch (e) { setSync({ error: e.message, ...total }); }
+    } catch (e) {
+      setSync({ error: e.message, ...total });
+    }
   }
 
   const pending = rows.filter((r) => !evalOf(r)).length;

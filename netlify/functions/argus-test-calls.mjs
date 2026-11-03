@@ -89,6 +89,7 @@ export async function handler(event) {
     const idCampanha = Number(
       params.idCampanha || 1
     );
+    const idGrupoUsuario = Number(params.idGrupoUsuario || 1);
 
     const horas = Number(
       params.horas || 1
@@ -101,6 +102,10 @@ export async function handler(event) {
       return json(400, {
         error: 'ID da campanha inválido.'
       });
+    }
+
+    if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
+      return json(400, { error: 'ID do grupo operacional inválido.' });
     }
 
     if (
@@ -166,6 +171,7 @@ if (hora < 8) {
 
 const payload = {
   idCampanha,
+  idGrupoUsuario,
   periodoInicial: inicio.toISOString(),
   periodoFinal: fim.toISOString()
 };
@@ -305,6 +311,7 @@ const rankingResultados = Object.entries(resultados)
 return json(200, {
   sucesso: true,
   campanha: idCampanha,
+  grupoOperacional: idGrupoUsuario,
   periodo: {
     inicial: payload.periodoInicial,
     final: payload.periodoFinal

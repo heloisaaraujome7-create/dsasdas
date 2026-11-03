@@ -16,6 +16,11 @@ export async function handler(event) {
   let input;
   try { input = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Corpo inválido.' }); }
   const idCampanha = Number(input.idCampanha || 1);
+  const idGrupoUsuario = Number(input.idGrupoUsuario || 1);
+
+  if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
+    return json(400, { error: 'Grupo operacional inválido.' });
+  }
   const start = new Date(input.periodoInicial);
   const end = new Date(input.periodoFinal);
   if (!Number.isInteger(idCampanha) || idCampanha <= 0) return json(400, { error: 'idCampanha inválido.' });
@@ -34,7 +39,12 @@ export async function handler(event) {
     const newOps = new Map();
 
     while (Date.now() < deadline) {
-      const payload = { idCampanha, periodoInicial: start.toISOString(), periodoFinal: end.toISOString() };
+const payload = {
+  idCampanha,
+  idGrupoUsuario,
+  periodoInicial: start.toISOString(),
+  periodoFinal: end.toISOString()
+};
       if (ultimoId) payload.ultimoId = ultimoId;
       const data = await argusPost('/report/ligacoesdetalhadas', payload, Math.max(2000, deadline - Date.now() + 1000));
       if (data?.codStatus !== undefined && Number(data.codStatus) < 1) {
@@ -54,18 +64,18 @@ export async function handler(event) {
         const op = userId != null ? opMap.get(String(userId)) : null;
         if (userId != null && !op) newOps.set(String(userId), { argus_user_id: String(userId), name: r.usuarioOperador || `Operador ${userId}` });
         records.push({
+          source: 'argus',
           argus_call_id: String(r.idLigacao),
+          argus_campaign_id: idCampanha,
+          argus_lead_id: pick(r, ['nrLead']) != null ? String(pick(r, ['nrLead'])) : null,
           argus_user_id: userId != null ? String(userId) : null,
           operator_name: r.usuarioOperador || null,
           call_started_at: r.dataHoraLigacao ? new Date(r.dataHoraLigacao).toISOString() : null,
           duration_seconds: Number(r.tempoSegundos) || 0,
           call_result: result,
           tabulation: r.tabulacao || null,
-          lead_number: pick(r, ['nrLead']) != null ? String(r.nrLead) : null,
-          campaign_id: idCampanha,
           manager_id: op?.manager_id ?? null,
           supervisor_id: op?.supervisor_id ?? null,
-          synced_at: new Date().toISOString(),
         });
       }
       for (let i = 0; i < records.length; i += 500) {
