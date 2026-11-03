@@ -21,6 +21,10 @@ export async function handler(event) {
 if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
   return json(400, { error: 'Grupo operacional inválido.' });
 }
+
+if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
+  return json(400, { error: 'Grupo operacional inválido.' });
+}
   const start = new Date(input.periodoInicial);
   const end = new Date(input.periodoFinal);
   if (!Number.isInteger(idCampanha) || idCampanha <= 0) return json(400, { error: 'idCampanha inválido.' });
@@ -39,7 +43,7 @@ if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
     const newOps = new Map();
 
     while (Date.now() < deadline) {
-      const payload = {
+const payload = {
   idCampanha,
   idGrupoUsuario,
   periodoInicial: start.toISOString(),
