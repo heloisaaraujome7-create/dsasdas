@@ -95,11 +95,13 @@ export default function Calls({ session, role }) {
         let ultimoId;
         for (let guard = 0; guard < 40; guard++) {
           setSync({ running: true, text: `Janela ${i + 1} de ${windows.length}…`, ...total });
-          const r = await callFn('argus-sync-calls', session, { idCampanha: 1, periodoInicial: windows[i][0].toISOString(), periodoFinal: windows[i][1].toISOString(), ultimoId });
-          total.fetched += r.fetched; total.matched += r.matched; total.saved += r.saved; total.hitLimit ||= r.hitLimit;
-          for (const [k, v] of Object.entries(r.byResult)) total.byResult[k] = (total.byResult[k] || 0) + v;
-          if (r.done) break;
-          ultimoId = r.nextUltimoId;
+const r = await callFn('argus-sync-calls', session, {
+  idCampanha: 1,
+  idGrupoUsuario: 1,
+  periodoInicial: windows[i][0].toISOString(),
+  periodoFinal: windows[i][1].toISOString(),
+  ultimoId
+});
         }
       }
       setSync({ done: true, ...total });
