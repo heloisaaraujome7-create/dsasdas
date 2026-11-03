@@ -241,23 +241,35 @@ export async function handler(event) {
     }
 
     // Atualizar ligação
-    const { error: updateError } = await supabase
-      .from('call_records')
-      .update({
-        audio_storage_path: storagePath,
-        audio_format: extension,
-        updated_at: new Date().toISOString()
-      })
-      .eq('argus_campaign_id', idCampanha)
-      .eq('argus_call_id', String(idLigacao));
+// Atualizar ligação pelo ID único do registro
+const { data: updatedCall, error: updateError } = await supabase
+  .from('call_records')
+  .update({
+    audio_storage_path: storagePath,
+    audio_format: extension,
+    updated_at: new Date().toISOString()
+  })
+  .eq('id', call.id)
+  .select('id, audio_storage_path, audio_format')
+  .maybeSingle();
 
-    if (updateError) {
-      return json(500, {
-        error: 'Áudio armazenado, mas não foi possível atualizar a ligação.',
-        detail: updateError.message,
-        storagePath
-      });
-    }
+if (updateError) {
+  console.error('Erro ao atualizar call_records:', updateError);
+
+  return json(500, {
+    error: 'Áudio armazenado, mas não foi possível atualizar a ligação.',
+    detail: updateError.message,
+    code: updateError.code,
+    storagePath
+  });
+}
+
+if (!updatedCall) {
+  return json(500, {
+    error: 'O áudio foi armazenado, mas o registro da ligação não foi atualizado.',
+    storagePath
+  });
+}
 
     return json(200, {
       success: true,
