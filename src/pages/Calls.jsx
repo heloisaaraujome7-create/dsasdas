@@ -73,6 +73,12 @@ export default function Calls({ session, role }) {
   const [operator, setOperator] = useState('all');
   const [selected, setSelected] = useState(null);
   const [sync, setSync] = useState(null);
+  const [leadSearch, setLeadSearch] = useState('127142211');
+const [recordings, setRecordings] = useState([]);
+const [recordingBusy, setRecordingBusy] = useState(false);
+const [recordingError, setRecordingError] = useState('');
+const [recordingMessage, setRecordingMessage] = useState('');
+const [downloadingId, setDownloadingId] = useState(null);
   const canSync = role === 'director' || role === 'quality';
   const canEvaluate = ['director', 'quality', 'manager', 'supervisor'].includes(role);
 
@@ -136,6 +142,74 @@ export default function Calls({ session, role }) {
       setSync({ error: e.message, ...total });
     }
   }
+  async function searchRecordings() {
+  const nrLead = Number(leadSearch);
+
+  if (!Number.isSafeInteger(nrLead) || nrLead <= 0) {
+    setRecordingError('Informe um número de Lead válido.');
+    return;
+  }
+
+  setRecordingBusy(true);
+  setRecordingError('');
+  setRecordingMessage('');
+  setRecordings([]);
+
+  try {
+    const result = await callFn('argus-list-recordings', session, {
+      idCampanha: 1,
+      nrLead
+    });
+
+    const items =
+      result?.data?.retornoLigacoesItens ||
+      result?.retornoLigacoesItens ||
+      [];
+
+    setRecordings(items);
+
+    if (!items.length) {
+      setRecordingMessage('Nenhuma gravação encontrada para esse Lead.');
+    }
+  } catch (e) {
+    setRecordingError(e.message || 'Erro ao consultar gravações.');
+  } finally {
+    setRecordingBusy(false);
+  }
+}
+
+async function downloadRecording(item) {
+  const idLigacao = Number(item.idLigacao);
+  const idCampanha = Number(item.idCampanha || 1);
+
+  if (!Number.isSafeInteger(idLigacao) || idLigacao <= 0) {
+    setRecordingError('ID da ligação inválido.');
+    return;
+  }
+
+  setDownloadingId(idLigacao);
+  setRecordingError('');
+  setRecordingMessage('');
+
+  try {
+    const result = await callFn('argus-download-recording', session, {
+      idCampanha,
+      idLigacao,
+      formato: 'MP3',
+      opcaoCanais: 1
+    });
+
+    setRecordingMessage(
+      result.message || 'Gravação armazenada com sucesso.'
+    );
+
+    await reload();
+  } catch (e) {
+    setRecordingError(e.message || 'Não foi possível baixar o áudio.');
+  } finally {
+    setDownloadingId(null);
+  }
+}
 
   const pending = rows.filter((r) => !evalOf(r)).length;
   return <>
@@ -148,7 +222,91 @@ export default function Calls({ session, role }) {
       <p>{sync.error ? sync.error + ' ' : ''}O Argus retornou {sync.fetched ?? 0} registros; {sync.matched ?? 0} com resultado ATENDIMENTO (gravados: {sync.saved ?? 0}).
         {sync.byResult && Object.keys(sync.byResult).length > 0 && <> Por resultado: {Object.entries(sync.byResult).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(' · ')}.</>}
         {sync.hitLimit && ' Atenção: uma janela atingiu o limite de 15.000 registros; avise o suporte para reduzir o intervalo.'}</p>
+      
     </div></div>}
+    <section className="panel calls-panel">
+  <div className="panel-header">
+    <div>
+      <h3>Gravações do Argus</h3>
+      <p>Pesquise pelo número do Lead e localize as gravações.</p>
+    </div>
+  </div>
+
+  <div className="filter-toolbar wrap">
+    <label className="filter-select">
+      <span>Número do Lead</span>
+      <input
+        type="number"
+        value={leadSearch}
+        onChange={(e) => setLeadSearch(e.target.value)}
+        placeholder="Digite o número do Lead"
+      />
+    </label>
+
+    <button
+      className="primary-button"
+      onClick={searchRecordings}
+      disabled={recordingBusy}
+    >
+      <Search size={14} />
+      {recordingBusy ? 'Consultando...' : 'Buscar gravações'}
+    </button>
+  </div>
+
+  {recordingError && (
+    <div className="notice error">
+      <div>{recordingError}</div>
+    </div>
+  )}
+
+  {recordingMessage && (
+    <div className="notice info">
+      <div>{recordingMessage}</div>
+    </div>
+  )}
+
+  {recordings.length > 0 && (
+    <div className="table-wrap">
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Data e hora</th>
+            <th>ID ligação</th>
+            <th>Cliente</th>
+            <th>Operador</th>
+            <th>Duração</th>
+            <th>Resultado</th>
+            <th>Áudio</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {recordings.map((item) => (
+            <tr key={item.idLigacao}>
+              <td>{item.dataHoraLigacao || '—'}</td>
+              <td>{item.idLigacao}</td>
+              <td>{item.nomeCliente || '—'}</td>
+              <td>{item.usuarioOperador || '—'}</td>
+              <td>{fmtDuration(item.tempoSegundos)}</td>
+              <td>{item.resultadoLigacao || '—'}</td>
+              <td>
+                <button
+                  className="secondary-button small"
+                  onClick={() => downloadRecording(item)}
+                  disabled={downloadingId !== null}
+                >
+                  {downloadingId === Number(item.idLigacao)
+                    ? 'Baixando...'
+                    : 'Baixar MP3'}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</section>
     {error && <div className="notice error"><div><b>Não foi possível carregar as ligações.</b><p>{error} — rode o supabase/schema.sql atualizado no Supabase.</p></div></div>}
 
     <section className="panel calls-panel">
