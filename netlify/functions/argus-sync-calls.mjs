@@ -31,7 +31,11 @@ if (!Number.isInteger(idGrupoUsuario) || idGrupoUsuario <= 0) {
   const start = new Date(input.periodoInicial);
   const end = new Date(input.periodoFinal);
   if (!Number.isInteger(idCampanha) || idCampanha <= 0) return json(400, { error: 'idCampanha inválido.' });
-  if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return json(400, { error: 'Período inválido.' });
+  if (
+  Number.isNaN(start.getTime()) ||
+  Number.isNaN(end.getTime()) ||
+  end <= start
+) return json(400, { error: 'Período inválido.' });
   if (end - start > MAX_WINDOW_MS) return json(400, { error: 'Use janelas de no máximo 60 minutos.' });
 
   const deadline = Date.now() + 7000;
@@ -87,7 +91,11 @@ const payload = {
       }
       for (let i = 0; i < records.length; i += 500) {
         const chunk = records.slice(i, i + 500);
-        const { error } = await supabase.from('call_records').upsert(chunk, { onConflict: 'argus_call_id' });
+        const { error } = await supabase
+  .from('call_records')
+  .upsert(chunk, {
+    onConflict: 'argus_campaign_id,argus_call_id'
+  });
         if (error) return json(500, { error: 'Falha ao gravar no Supabase: ' + error.message });
         saved += chunk.length;
       }
