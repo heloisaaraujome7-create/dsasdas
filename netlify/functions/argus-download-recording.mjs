@@ -244,11 +244,11 @@ export async function handler(event) {
 // Atualizar ligação pelo ID único do registro
 const { data: updatedCall, error: updateError } = await supabase
   .from('call_records')
-  .update({
-    audio_storage_path: storagePath,
-    audio_format: extension,
-    updated_at: new Date().toISOString()
-  })
+.update({
+  audio_storage_path: storagePath,
+  audio_format: formato,
+  updated_at: new Date().toISOString()
+})
   .eq('id', call.id)
   .select('id, audio_storage_path, audio_format')
   .maybeSingle();
